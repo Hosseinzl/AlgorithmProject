@@ -1,6 +1,6 @@
 ﻿using Geektori;
 
-int[] input = {3, 3 , 3, 4, 3, 5, 4, 4, 3};
+int[] input = {1, 1, 1};
 
 geektory g = new geektory(input);
 

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Geektori
+﻿namespace Geektori
 {
 
     public class geektory
@@ -18,47 +11,67 @@ namespace Geektori
             _input = input;
         }
 
-        public void geektoryUtil(int[] input)
+        public void Util(int[] input)
         {
-
-            if (AreAllValuesSame(input))
-            {
-                score = input.Length * input.Length;
-            }
-
             while (input.Length > 0)
             {
+                if (AreAllValuesSame(input))
+                {
+                    score += input.Length * input.Length;
+                    return;
+                }
+
                 var dictionay = initialInputDetail(input);
                 var mostRepeatedNumber = dictionay.Last().Key;
 
-                var firstIndex = Array.IndexOf(input, mostRepeatedNumber);
-                int nextIndex;
-                for(int i = firstIndex; i < input.Length; ++i)
+                int firstIndex = Array.IndexOf(input, mostRepeatedNumber);
+                int lastIndex = Array.LastIndexOf(input, mostRepeatedNumber);
+
+                var subArray = GetSubarray(input, firstIndex, lastIndex);
+
+                if (firstIndex == 0 && lastIndex + 1 == input.Length)
                 {
-                    if (input[i] == mostRepeatedNumber)
+                    List<int> currentSubarray = new();
+                    bool insideSubarray = false;
+                    int i = 0;
+                    foreach (int num in input)
                     {
-
-                        var subarray = GetSubarray(input, firstIndex, i);
-
-                        if (subarray.Length > 0)
+                        if (num == mostRepeatedNumber)
                         {
-                            geektoryUtil(subarray);
-                            DeleteSubarray(input, firstIndex, i);
+                            if (insideSubarray)
+                            {
+                                Util(currentSubarray.ToArray());
+                                currentSubarray = new();
+                            }
+                            else
+                            {
+                                insideSubarray = true;
+                            }
                         }
-
-                        firstIndex = i + 1;
-
-                    } 
+                        else if (insideSubarray)
+                        {
+                            currentSubarray.Add(num);
+                            input = DeleteSubarray(input, i, i).Item1;
+                            i--;
+                        }
+                        i++;
+                    }
                 }
-                
+                else
+                {
+                    Util(subArray);
+                    var result = DeleteSubarray(input, firstIndex, lastIndex);
+                    input = result.Item1;
+                }
             }
         }
+
          
         public Dictionary<int, int> initialInputDetail(int[] input)
         {
             Dictionary<int, int> inputDetail = new();
 
-            foreach (var number in _input)
+            foreach (var number in input)
             {
                 if (inputDetail.ContainsKey(number))
                 {
@@ -101,7 +114,7 @@ namespace Geektori
             return true;
         }
 
-        static int[] DeleteSubarray(int[] array, int firstIndex, int lastIndex)
+        static (int[],int) DeleteSubarray(int[] array, int firstIndex, int lastIndex)
         {
             if (firstIndex < 0 || firstIndex >= array.Length || lastIndex < 0 || lastIndex >= array.Length || firstIndex > lastIndex)
             {
@@ -111,7 +124,7 @@ namespace Geektori
             List<int> newList = new List<int>(array);
             newList.RemoveRange(firstIndex, lastIndex - firstIndex + 1);
 
-            return newList.ToArray();
+            return (newList.ToArray(),lastIndex - firstIndex + 1);
         }
 
         static int[] GetSubarray(int[] array, int firstIndex, int lastIndex)
@@ -127,7 +140,8 @@ namespace Geektori
 
         public void main()
         {
-            geektoryUtil(_input);
+            Util(_input);
+            Console.WriteLine(score);
         }
 
     }
